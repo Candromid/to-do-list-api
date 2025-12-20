@@ -1,0 +1,81 @@
+@tokenA = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY2MjE5MzM2LCJpYXQiOjE3NjYyMTc1MzYsImp0aSI6IjkwOGI1ODdlM2ViMzQ3NTliMGNiMTlmMzI2YWVhNDcyIiwidXNlcl9pZCI6IjYifQ.vC5TRHhSAoAuBmQ3YMLfZIXW-EmyK2gCLfyrFdP1PfY
+@tokenB = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY2MjE5MzU2LCJpYXQiOjE3NjYyMTc1NTYsImp0aSI6ImI2ZTE4MDRiNjM2OTRlMDg5N2JiZjViYzUwYWI3YjJmIiwidXNlcl9pZCI6IjcifQ.fQ46YljY2Tn_annjTjmBrOvEcckshVxR8WGE3oTg6gs
+
+### Регистрация
+POST http://127.0.0.1:8000/api/users/register/
+Content-Type: application/json
+
+{
+  "username": "user_a",
+  "password": "12345678"
+}
+
+### Получить токен
+POST http://127.0.0.1:8000/api/token/
+Content-Type: application/json
+
+{
+  "username": "user_a",
+  "password": "12345678"
+}
+
+###Получить токен user_b
+POST http://127.0.0.1:8000/api/token/
+Content-Type: application/json
+
+{
+  "username": "user_b",
+  "password": "12345678"
+}
+
+### Create task by user A
+POST http://127.0.0.1:8000/api/tasks/
+Authorization: Bearer {{tokenA}}
+Content-Type: application/json
+
+{
+  "title": "Task from user A"
+}
+
+
+
+
+
+### Получить задачи user A
+GET http://127.0.0.1:8000/api/tasks/
+Authorization: Bearer {{tokenA}}
+
+### Получить задачи
+GET http://127.0.0.1:8000/api/tasks/
+Authorization: Bearer {{tokenB}}
+
+### User B tries to access task 1
+GET http://127.0.0.1:8000/api/tasks/7/
+Authorization: Bearer {{tokenB}}
+
+
+### User B tries to update чужую задачу
+PATCH http://127.0.0.1:8000/api/tasks/7/
+Authorization: Bearer {{tokenB}}
+Content-Type: application/json
+
+{
+  "completed": true
+}
+
+
+### User B tries to delete чужую задачу
+DELETE http://127.0.0.1:8000/api/tasks/7/
+Authorization: Bearer {{tokenB}}
+
+
+
+### User B tries to create task for user A
+POST http://127.0.0.1:8000/api/tasks/
+Authorization: Bearer {{tokenB}}
+Content-Type: application/json
+
+{
+  "title": "Hacked task",
+  "user": 1
+}

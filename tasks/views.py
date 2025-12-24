@@ -24,7 +24,8 @@ class TaskViewSet(ModelViewSet):
 class TaskListView(LoginRequiredMixin, ListView):
     model = Task
     template_name = 'tasks/task_list.html'
-
+    context_object_name = 'tasks'
+    
     def get_queryset(self):
         # показываем только задачи текущего пользователя
         return Task.objects.filter(user=self.request.user)

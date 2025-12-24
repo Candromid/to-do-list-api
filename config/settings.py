@@ -136,9 +136,12 @@ USE_TZ = True
 
 APPEND_SLASH = True 
 
-LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = '/login/'
+# После успешного логина пользователь переходит на HTML список задач
+LOGIN_REDIRECT_URL = '/tasks/page/'
+LOGIN_URL = '/login/'
+
+# куда перенаправлять пользователя полсе логаута
+LOGOUT_REDIRECT_URL = '/login/' 
 
 
 

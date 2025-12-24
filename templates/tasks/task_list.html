@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Мои задачи{% endblock %}
+
+{% block content %}
+<h2>Мои задачи</h2>
+
+<form method="post" action="{% url 'logout' %}">
+    {% csrf_token %}
+    <button type="submit">Выйти</button>
+</form>
+
+
+<ul>
+    {% for task in tasks %}
+        <li>
+            {{ task.title }}
+            {% if task.completed %}
+                ✅
+            {% else %}
+                ⏳
+            {% endif %}
+        </li>
+    {% empty %}
+        <li>Задач пока нет</li>
+    {% endfor %}
+</ul>
+{% endblock %}

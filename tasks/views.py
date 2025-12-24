@@ -46,8 +46,16 @@ class TaskUpdateView(LoginRequiredMixin, UpdateView):
     form_class = TaskForm
     template_name = 'tasks/task_edit.html'
     success_url = reverse_lazy('task-list-page')
+    
+    def get_queryset(self):
+        # ⚡️ Возвращаем только задачи текущего пользователя
+        return Task.objects.filter(user=self.request.user)
 
 class TaskDeleteView(LoginRequiredMixin, DeleteView):
     model = Task
     template_name = 'tasks/task_confirm_delete.html'
     success_url = reverse_lazy('task-list-page')
+    
+    def get_queryset(self):
+        # ⚡️ Только свои задачи
+        return Task.objects.filter(user=self.request.user)

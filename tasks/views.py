@@ -1,6 +1,6 @@
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated
-from .permissions import IsOwner
+from .permissions import IsOwnerOrAdmin
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
@@ -13,13 +13,21 @@ from .serializers import TaskSerializer
 
 class TaskViewSet(ModelViewSet):
     serializer_class = TaskSerializer
-    permission_classes = [IsAuthenticated, IsOwner]
+    permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
+    # IsOwner = owner или админ (как мы обсуждали)
 
     def get_queryset(self):
-        return Task.objects.filter(user=self.request.user)  # показываем только задачи текущего пользователя
+        user = self.request.user
+
+        if user.is_staff:
+            return Task.objects.all()        # админ видит всё
+
+        return Task.objects.filter(owner=user)  # пользователь — только свои
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)  # привязываем задачу к текущему пользователю
+        serializer.save(owner=self.request.user)  # назначаем владельца
+
+
 
 class TaskListView(LoginRequiredMixin, ListView):
     model = Task
@@ -28,7 +36,13 @@ class TaskListView(LoginRequiredMixin, ListView):
     
     def get_queryset(self):
         # показываем только задачи текущего пользователя
-        return Task.objects.filter(user=self.request.user)
+        user = self.request.user
+
+        if user.is_staff:
+            return Task.objects.all()        # админ
+
+        return Task.objects.filter(owner=user)  # пользователь
+
 
 class TaskCreateView(LoginRequiredMixin, CreateView):
     model = Task
@@ -38,7 +52,7 @@ class TaskCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         # ⚡️ Привязываем задачу к текущему пользователю
-        form.instance.user = self.request.user
+        form.instance.owner = self.request.user  # владелец задачи 
         return super().form_valid(form)
 
 class TaskUpdateView(LoginRequiredMixin, UpdateView):
@@ -48,8 +62,12 @@ class TaskUpdateView(LoginRequiredMixin, UpdateView):
     success_url = reverse_lazy('task-list-page')
     
     def get_queryset(self):
-        # ⚡️ Возвращаем только задачи текущего пользователя
-        return Task.objects.filter(user=self.request.user)
+        user = self.request.user
+
+        if user.is_staff:
+            return Task.objects.all()        # админ может редактировать всё
+
+        return Task.objects.filter(owner=user)  # пользователь — только свои
 
 class TaskDeleteView(LoginRequiredMixin, DeleteView):
     model = Task
@@ -57,5 +75,9 @@ class TaskDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('task-list-page')
     
     def get_queryset(self):
-        # ⚡️ Только свои задачи
-        return Task.objects.filter(user=self.request.user)
+        user = self.request.user
+
+        if user.is_staff:
+            return Task.objects.all()        # админ удаляет всё
+
+        return Task.objects.filter(owner=user)  # пользователь — только свои

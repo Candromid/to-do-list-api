@@ -3,10 +3,7 @@ from django.urls import path, include
 from django.shortcuts import redirect
 
 # JWT (API авторизация)
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
-)
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 # Django-auth (WEB авторизация)
 from django.contrib.auth.views import LoginView, LogoutView
@@ -15,11 +12,16 @@ from django.contrib.auth.views import LoginView, LogoutView
 def home(request):
     """
     Корень сайта /
-    - если пользователь авторизован → личный кабинет (HTML)
-    - если нет → страница логина
+    - если пользователь авторизован:
+        - superuser → сразу в кастомную админку (/dashboard/)
+        - обычный пользователь → личный кабинет (/tasks/page/)
+    - если не авторизован → страница логина
     """
     if request.user.is_authenticated:
-        return redirect("task-list-page")
+        if request.user.is_superuser or request.user.is_staff:
+            return redirect("admin-dashboard")
+        else:
+            return redirect("task-list-page")
     return redirect("login")
 
 
@@ -27,26 +29,20 @@ urlpatterns = [
     # ===== Корень сайта =====
     path("", home, name="home"),
 
-    # ===== Админка Django =====
-    # Доступна только superuser / staff
+    # ===== Стандартная админка Django =====
     path("admin/", admin.site.urls),
 
     # ===== JWT авторизация (API) =====
-    # Используется для REST / Postman / Frontend / Mobile
     path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
 
-    # ===== API пользователей и регистрация =====
-    # /api/users/register/
+    # ===== API пользователей =====
     path("api/users/", include("users.urls")),
 
-    # ===== WEB: задачи и личный кабинет =====
-    # HTML страницы
+    # ===== WEB: задачи и кастомная админка =====
     path("", include("tasks.urls")),
 
     # ===== WEB: аутентификация =====
-    # /login/
-    # /logout/
     path(
         "login/",
         LoginView.as_view(template_name="registration/login.html"),
@@ -59,6 +55,5 @@ urlpatterns = [
     ),
 
     # ===== WEB: регистрация =====
-    # /register/
-    path("", include("users.urls")),
+    path("users/", include("users.urls")),  # явный префикс для регистрации/профиля
 ]

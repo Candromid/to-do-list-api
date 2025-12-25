@@ -10,17 +10,48 @@
             padding: 0;
             background: #f5f5f5;
         }
+
         header {
             background: #222;
             color: white;
             padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
+
+        header h2 {
+            margin: 0;
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+        }
+
+        nav a, nav form button {
+            margin-left: 15px;
+            color: #4ea3ff;
+            text-decoration: none;
+            font-weight: bold;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+            padding: 0;
+        }
+
+        nav a:hover, nav form button:hover {
+            text-decoration: underline;
+        }
+
         main {
             padding: 20px;
         }
-        a {
-            color: #4ea3ff;
-            text-decoration: none;
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
         }
     </style>
 </head>
@@ -28,13 +59,37 @@
 
 <header>
     <h2>📝 ToDo App</h2>
-    {% if user.is_authenticated %}
-        <p>Вы вошли как {{ user.username }}</p>
-    {% endif %}
+
+    <nav>
+        {% if user.is_authenticated %}
+            <span>Привет, {{ user.username }}</span>
+
+            {% if user.is_superuser %}
+                <!-- Меню админа -->
+                <a href="{% url 'admin-dashboard' %}">Админка</a>
+            {% endif %}
+
+            <!-- Общие ссылки для всех авторизованных пользователей -->
+            <a href="{% url 'task-list-page' %}">Мои задачи</a>
+
+            <!-- Logout через POST -->
+            <form method="post" action="{% url 'logout' %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit">Выйти</button>
+            </form>
+
+        {% else %}
+            <!-- Меню для гостей -->
+            <a href="{% url 'login' %}">Вход</a>
+            <a href="{% url 'register' %}">Регистрация</a>
+        {% endif %}
+    </nav>
 </header>
 
 <main>
-    {% block content %}{% endblock %}
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
 </main>
 
 </body>

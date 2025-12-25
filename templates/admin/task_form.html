@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+.task-form {
+    max-width: 600px;
+    margin: 40px auto;
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    font-family: Arial, sans-serif;
+}
+
+.task-form h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.task-form form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.task-form input[type="text"],
+.task-form textarea,
+.task-form select {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.task-form button {
+    padding: 10px;
+    background-color: #2196F3;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.task-form button:hover {
+    background-color: #0b7dda;
+}
+
+.task-form a.cancel-btn {
+    display: inline-block;
+    margin-top: 10px;
+    color: #F44336;
+    text-decoration: none;
+}
+</style>
+
+<div class="task-form">
+    <h2>{{ title }}</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Сохранить</button>
+    </form>
+    <a href="{% url 'admin-dashboard' %}" class="cancel-btn">Отмена</a>
+</div>
+
+{% endblock %}
